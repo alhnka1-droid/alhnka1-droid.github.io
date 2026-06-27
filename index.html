@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>حاسبة تكاليف خزائن الملابس</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+
+  :root {
+    --wood: #8B5E3C;
+    --wood-light: #C49A6C;
+    --wood-dark: #5C3D1E;
+    --bg: #FAF6F1;
+    --surface: #FFFFFF;
+    --surface2: #F5EFE6;
+    --border: #E0D3C0;
+    --text: #2C1A0E;
+    --text-muted: #7A6350;
+    --accent: #D47C2F;
+    --accent-light: #F5E6CC;
+    --green: #2D7A4F;
+    --green-light: #E6F5ED;
+    --red: #C0392B;
+    --shadow: 0 2px 12px rgba(139,94,60,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Cairo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  header {
+    background: linear-gradient(135deg, var(--wood-dark) 0%, var(--wood) 60%, var(--wood-light) 100%);
+    color: #fff;
+    padding: 28px 24px 22px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  header h1 { font-size: 1.7rem; font-weight: 900; letter-spacing: -0.5px; position: relative; }
+  header p { font-size: 0.9rem; opacity: 0.85; margin-top: 4px; position: relative; }
+
+  .container { max-width: 860px; margin: 0 auto; padding: 20px 16px 60px; }
+
+  .card {
+    background: var(--surface);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    padding: 22px 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+
+  .card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--wood-dark);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 2px solid var(--surface2);
+    padding-bottom: 10px;
+  }
+  .card-title .icon {
+    width: 32px; height: 32px;
+    background: var(--accent-light);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  @media(max-width: 600px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+  }
+
+  label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+  }
+
+  input[type="number"], select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.95rem;
+    color: var(--text);
+    background: var(--bg);
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  input[type="number"]:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: #fff;
+  }
+
+  .door-row {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 10px;
+    align-items: end;
+    padding: 12px;
+    background: var(--surface2);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border);
+  }
+  .door-row label { margin-bottom: 4px; }
+
+  .accessory-row {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 9px;
+    margin-bottom: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+  }
+  .accessory-label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-add {
+    background: none;
+    border: 1.5px dashed var(--accent);
+    color: var(--accent);
+    border-radius: 9px;
+    padding: 8px 16px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 6px;
+    transition: background 0.2s;
+  }
+  .btn-add:hover { background: var(--accent-light); }
+
+  .btn-remove {
+    background: none;
+    border: none;
+    color: var(--red);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+  }
+
+  .calc-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, var(--wood-dark), var(--wood));
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 6px;
+    transition: opacity 0.2s, transform 0.1s;
+    letter-spacing: 0.5px;
+  }
+  .calc-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+  .calc-btn:active { transform: translateY(0); }
+
+  .result-card {
+    background: linear-gradient(135deg, var(--wood-dark) 0%, var(--wood) 100%);
+    color: #fff;
+    border-radius: 16px;
+    padding: 24px 20px;
+    margin-top: 20px;
+    display: none;
+  }
+  .result-card.show { display: block; }
+  .result-title {
+    font-size: 1rem;
+    font-weight: 700;
+    opacity: 0.85;
+    margin-bottom: 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    padding-bottom: 10px;
+  }
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    font-size: 0.9rem;
+  }
+  .result-row:last-child { border-bottom: none; }
+  .result-row .label { opacity: 0.8; }
+  .result-row .value { font-weight: 700; }
+  .result-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 2px solid rgba(255,255,255,0.3);
+  }
+  .result-total .label { font-size: 1rem; font-weight: 700; }
+  .result-total .value {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #FFE0A0;
+  }
+
+  .profit-highlight {
+    background: rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .profit-highlight .label { font-size: 0.9rem; opacity: 0.9; }
+  .profit-highlight .value { font-size: 1.3rem; font-weight: 900; color: #ADFFD4; }
+
+  .print-btn {
+    width: 100%;
+    padding: 12px;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    border: 1.5px solid rgba(255,255,255,0.4);
+    border-radius: 10px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 16px;
+    transition: background 0.2s;
+  }
+  .print-btn:hover { background: rgba(255,255,255,0.25); }
+
+  .badge {
+    display: inline-block;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-right: 4px;
+  }
+
+  .hint {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .section-sub {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin: 14px 0 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  @media print {
+    header, .card:not(.result-print), .calc-btn, .print-btn { display: none !important; }
+    .result-card { display: block !important; background: #fff !important; color: #000 !important; }
+    .result-row .label, .result-total .label, .profit-highlight .label { color: #333 !important; }
+    .result-row .value, .result-total .value, .profit-highlight .value { color: #000 !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🪵 حاسبة تكاليف خزائن الملابس</h1>
+  <p>احسب التكلفة الدقيقة وسعر البيع للعميل بثوانٍ</p>
+</header>
+
+<div class="container">
+
+  <!-- أبعاد الخزانة -->
+  <div class="card">
+    <div class="card-title"><div class="icon">📐</div> أبعاد الخزانة</div>
+    <div class="grid-3">
+      <div>
+        <label>العرض (سم)</label>
+        <input type="number" id="width" placeholder="200" min="1">
+      </div>
+      <div>
+        <label>الارتفاع (سم)</label>
+        <input type="number" id="height" placeholder="240" min="1">
+      </div>
+      <div>
+        <label>العمق (سم)</label>
+        <input type="number" id="depth" placeholder="60" min="1">
+      </div>
+    </div>
+    <div class="hint" style="margin-top:10px">💡 المساحة الكلية للهيكل تحسب تلقائياً (جانبان + سقف + أرضية + ظهر) مع هدر 10%</div>
+  </div>
+
+  <!-- مواد الهيكل -->
+  <div class="card">
+    <div class="card-title"><div class="icon">🪵</div> مواد الهيكل الداخلي</div>
+    <div class="grid-2">
+      <div>
+        <label>نوع MDF للهيكل</label>
+        <select id="frameType">
+          <option value="chinese">ميلامين صيني</option>
+          <option value="saudi">ميلامين سعودي</option>
+        </select>
+      </div>
+      <div>
+        <label>سعر المتر المربع (ريال)</label>
+        <input type="number" id="framePrice" placeholder="85" min="0">
+      </div>
+    </div>
+  </div>
+
+  <!-- الأبواب -->
+  <div class="card">
+    <div class="card-title"><div class="icon">🚪</div> الأبواب</div>
+    <div id="doorsContainer"></div>
+    <button class="btn-add" onclick="addDoor()">+ إضافة نوع أبواب</button>
+  </div>
+
+  <!-- الأدراج -->
+  <div class="card">
+    <div class="card-title"><div class="icon">🗄️</div> الأدراج</div>
+    <div class="grid-3">
+      <div>
+        <label>عدد الأدراج</label>
+        <input type="number" id="drawerCount" placeholder="3" min="0">
+      </div>
+      <div>
+        <label>عرض الدرج الواحد (سم)</label>
+        <input type="number" id="drawerWidth" placeholder="50" min="0">
+      </div>
+      <div>
+        <label>عمق الدرج (سم)</label>
+        <input type="number" id="drawerDepth" placeholder="50" min="0">
+      </div>
+    </div>
+    <div style="margin-top:12px">
+      <div class="grid-2">
+        <div>
+          <label>نوع MDF للأدراج</label>
+          <select id="drawerMDF">
+            <option value="chinese">ميلامين صيني</option>
+            <option value="saudi">ميلامين سعودي</option>
+          </select>
+        </div>
+        <div>
+          <label>سعر المتر المربع (ريال)</label>
+          <input type="number" id="drawerPrice" placeholder="85" min="0">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- الإكسسوارات -->
+  <div class="card">
+    <div class="card-title"><div class="icon">🔧</div> الإكسسوارات</div>
+
+    <div class="accessory-row">
+      <div class="accessory-label">🔩 مفصلات أبواب</div>
+      <div><label>العدد</label><input type="number" id="hingeCount" placeholder="8" min="0"></div>
+      <div><label>سعر الواحدة (ريال)</label><input type="number" id="hingePrice" placeholder="5" min="0"></div>
+    </div>
+
+    <div class="accessory-row">
+      <div class="accessory-label">🛤️ سكك أدراج</div>
+      <div><label>العدد (زوج)</label><input type="number" id="trackCount" placeholder="3" min="0"></div>
+      <div><label>سعر الزوج (ريال)</label><input type="number" id="trackPrice" placeholder="25" min="0"></div>
+    </div>
+
+    <div class="accessory-row">
+      <div class="accessory-label">🖐️ مقابض</div>
+      <div><label>العدد</label><input type="number" id="handleCount" placeholder="6" min="0"></div>
+      <div><label>سعر الواحد (ريال)</label><input type="number" id="handlePrice" placeholder="12" min="0"></div>
+    </div>
+
+    <div class="accessory-row">
+      <div class="accessory-label">👔 بار تعليق ملابس</div>
+      <div><label>العدد</label><input type="number" id="barCount" placeholder="2" min="0"></div>
+      <div><label>سعر الواحد (ريال)</label><input type="number" id="barPrice" placeholder="30" min="0"></div>
+    </div>
+
+    <div class="accessory-row">
+      <div class="accessory-label">💡 إضاءة داخلية</div>
+      <div><label>العدد</label><input type="number" id="lightCount" placeholder="2" min="0"></div>
+      <div><label>سعر الواحدة (ريال)</label><input type="number" id="lightPrice" placeholder="45" min="0"></div>
+    </div>
+  </div>
+
+  <!-- العمالة والربح -->
+  <div class="card">
+    <div class="card-title"><div class="icon">👷</div> العمالة والربح</div>
+    <div class="grid-2">
+      <div>
+        <label>تكلفة العمالة (ريال / م²)</label>
+        <input type="number" id="laborRate" placeholder="120" min="0">
+        <div class="hint">تُطبق على إجمالي مساحة الخزانة</div>
+      </div>
+      <div>
+        <label>نسبة الربح المطلوبة (%)</label>
+        <input type="number" id="profitPct" placeholder="30" min="0" max="1000">
+      </div>
+    </div>
+  </div>
+
+  <button class="calc-btn" onclick="calculate()">🧮 احسب التكلفة والسعر النهائي</button>
+
+  <!-- النتيجة -->
+  <div class="result-card" id="resultCard">
+    <div class="result-title">📊 تفصيل التكاليف</div>
+
+    <div class="result-row">
+      <span class="label">🪵 تكلفة هيكل MDF</span>
+      <span class="value" id="r-frame">—</span>
+    </div>
+    <div class="result-row">
+      <span class="label">🚪 تكلفة الأبواب</span>
+      <span class="value" id="r-doors">—</span>
+    </div>
+    <div class="result-row">
+      <span class="label">🗄️ تكلفة الأدراج</span>
+      <span class="value" id="r-drawers">—</span>
+    </div>
+    <div class="result-row">
+      <span class="label">🔧 إجمالي الإكسسوارات</span>
+      <span class="value" id="r-acc">—</span>
+    </div>
+    <div class="result-row">
+      <span class="label">👷 تكلفة العمالة</span>
+      <span class="value" id="r-labor">—</span>
+    </div>
+
+    <div class="result-total">
+      <span class="label">💰 إجمالي التكلفة</span>
+      <span class="value" id="r-total">—</span>
+    </div>
+
+    <div class="profit-highlight">
+      <span class="label">🏷️ سعر البيع للعميل</span>
+      <span class="value" id="r-sell">—</span>
+    </div>
+    <div class="profit-highlight" style="margin-top:8px">
+      <span class="label">📈 صافي الربح</span>
+      <span class="value" id="r-profit">—</span>
+    </div>
+
+    <div id="r-breakdown" style="margin-top:16px; font-size:0.8rem; opacity:0.75; line-height:1.8;"></div>
+
+    <button class="print-btn" onclick="window.print()">🖨️ طباعة / حفظ PDF</button>
+  </div>
+
+</div>
+
+<script>
+  let doorCount = 0;
+
+  function addDoor() {
+    doorCount++;
+    const id = doorCount;
+    const container = document.getElementById('doorsContainer');
+    const div = document.createElement('div');
+    div.className = 'door-row';
+    div.id = 'door-' + id;
+    div.innerHTML = `
+      <div>
+        <label>نوع الباب ${id}</label>
+        <select id="dtype-${id}">
+          <option value="wood-cn">خشب MDF صيني</option>
+          <option value="wood-sa">خشب MDF سعودي</option>
+          <option value="glass">زجاج</option>
+          <option value="mirror">مرايا</option>
+        </select>
+      </div>
+      <div>
+        <label>المساحة (م²)</label>
+        <input type="number" id="darea-${id}" placeholder="0.8" min="0" step="0.01">
+      </div>
+      <div style="display:flex;flex-direction:column;">
+        <label>سعر م² (ريال)</label>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input type="number" id="dprice-${id}" placeholder="120" min="0" style="flex:1">
+          <button class="btn-remove" onclick="removeDoor(${id})" title="حذف">✕</button>
+        </div>
+      </div>
+    `;
+    container.appendChild(div);
+  }
+
+  function removeDoor(id) {
+    const el = document.getElementById('door-' + id);
+    if (el) el.remove();
+  }
+
+  function val(id) {
+    return parseFloat(document.getElementById(id)?.value) || 0;
+  }
+
+  function sar(n) {
+    return n.toLocaleString('ar-SA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ر.س';
+  }
+
+  function calculate() {
+    const W = val('width') / 100;
+    const H = val('height') / 100;
+    const D = val('depth') / 100;
+
+    if (!W || !H || !D) {
+      alert('يرجى إدخال أبعاد الخزانة أولاً');
+      return;
+    }
+
+    // مساحة الهيكل: جانبان + سقف + أرضية + ظهر
+    const frameArea = (2 * H * D) + (2 * W * D) + (W * H);
+    const frameAreaWithWaste = frameArea * 1.10;
+    const frameCost = frameAreaWithWaste * val('framePrice');
+
+    // الأبواب
+    let doorsCost = 0;
+    let doorsDetail = [];
+    for (let i = 1; i <= doorCount; i++) {
+      const el = document.getElementById('door-' + i);
+      if (!el) continue;
+      const area = parseFloat(document.getElementById('darea-' + i)?.value) || 0;
+      const price = parseFloat(document.getElementById('dprice-' + i)?.value) || 0;
+      const type = document.getElementById('dtype-' + i)?.value || '';
+      const typeNames = { 'wood-cn': 'خشب صيني', 'wood-sa': 'خشب سعودي', 'glass': 'زجاج', 'mirror': 'مرايا' };
+      const cost = area * price;
+      doorsCost += cost;
+      if (area && price) doorsDetail.push(`باب ${i} (${typeNames[type]}): ${area} م² × ${price} = ${sar(cost)}`);
+    }
+
+    // الأدراج
+    const dCount = val('drawerCount');
+    const dW = val('drawerWidth') / 100;
+    const dD = val('drawerDepth') / 100;
+    const dPrice = val('drawerPrice');
+    // مساحة كل درج: قاع + واجهة + جانبان + خلف
+    const drawerAreaEach = (dW * dD) + (dW * 0.15) + (2 * dD * 0.15) + (dW * 0.15);
+    const drawerTotalArea = drawerAreaEach * dCount * 1.10;
+    const drawerCost = drawerTotalArea * dPrice;
+
+    // الإكسسوارات
+    const hingeCost   = val('hingeCount')  * val('hingePrice');
+    const trackCost   = val('trackCount')  * val('trackPrice');
+    const handleCost  = val('handleCount') * val('handlePrice');
+    const barCost     = val('barCount')    * val('barPrice');
+    const lightCost   = val('lightCount')  * val('lightPrice');
+    const accTotal = hingeCost + trackCost + handleCost + barCost + lightCost;
+
+    // العمالة — على إجمالي مساحة الهيكل + الأبواب
+    const totalArea = frameAreaWithWaste;
+    const laborCost = totalArea * val('laborRate');
+
+    // الإجمالي
+    const totalCost = frameCost + doorsCost + drawerCost + accTotal + laborCost;
+    const profitPct = val('profitPct') / 100;
+    const sellPrice = totalCost * (1 + profitPct);
+    const profit = sellPrice - totalCost;
+
+    // عرض النتائج
+    document.getElementById('r-frame').textContent = sar(frameCost);
+    document.getElementById('r-doors').textContent = doorsCost ? sar(doorsCost) : '—';
+    document.getElementById('r-drawers').textContent = drawerCost ? sar(drawerCost) : '—';
+    document.getElementById('r-acc').textContent = sar(accTotal);
+    document.getElementById('r-labor').textContent = sar(laborCost);
+    document.getElementById('r-total').textContent = sar(totalCost);
+    document.getElementById('r-sell').textContent = sar(sellPrice);
+    document.getElementById('r-profit').textContent = sar(profit);
+
+    let breakdown = `📐 مساحة الهيكل الفعلية: ${frameArea.toFixed(2)} م² (بعد الهدر: ${frameAreaWithWaste.toFixed(2)} م²)`;
+    if (doorsDetail.length) breakdown += '<br>' + doorsDetail.join('<br>');
+    if (dCount && dPrice) breakdown += `<br>🗄️ أدراج: ${dCount} × ${drawerAreaEach.toFixed(2)} م² × ${dPrice} ر.س`;
+    document.getElementById('r-breakdown').innerHTML = breakdown;
+
+    const resultCard = document.getElementById('resultCard');
+    resultCard.classList.add('show');
+    resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // إضافة نوع أبواب افتراضي عند التحميل
+  addDoor();
+</script>
+</body>
+</html>
